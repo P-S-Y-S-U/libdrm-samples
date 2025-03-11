@@ -189,6 +189,7 @@ int main( int argc, const char* argv[] )
     for( int i = 0; i < resources->count_connectors; i++ )
     {
         drmModeConnectorPtr drm_connector = drmModeGetConnector( drm_fd, resources->connectors[i] );
+        int result;
         
         if(!drm_connector)
             continue;
@@ -241,6 +242,17 @@ int main( int argc, const char* argv[] )
         std::cout << "Created FB with id " << output.fb.id << "\n";
 
         output.previousCrtc = drmModeGetCrtc( drm_fd, output.crtc_id );
+
+        result = drmModeSetCrtc(drm_fd, output.crtc_id, output.fb.id,
+            0, 0,
+            &output.conn_id,
+            1, &output.mode
+        );
+
+        if( result < 0 ) {
+            std::cout << "Failed to set CRTC\n";
+        }
+
         break;
 incompatible:
             drmModeFreeConnector(drm_connector);
