@@ -35,6 +35,39 @@ struct presenter
     dumb_fb fb;
 };
 
+void drawFrame( presenter& output )
+{
+    uint8_t color[4] = { 0x00, 0x00, 0xff, 0x00 };
+    int inc = 1, dec = 2;
+    
+    for (int i = 0; i < 60 * 5; ++i) {
+		color[inc] += 15;
+		color[dec] -= 15;
+
+		if (color[dec] == 0) {
+			dec = inc;
+			inc = (inc + 2) % 3;
+		}
+		
+		dumb_fb *fb = &output.fb;
+
+		for (uint32_t y = 0; y < fb->height; ++y) {
+			uint8_t *row = fb->data + fb->stride * y;
+
+			for (uint32_t x = 0; x < fb->width; ++x) {
+				row[x * 4 + 0] = color[0];
+				row[x * 4 + 1] = color[1];
+				row[x * 4 + 2] = color[2];
+				row[x * 4 + 3] = color[3];
+			}
+		}
+
+		// Should give 60 FPS
+		timespec ts = { .tv_nsec = 16666667 };
+		nanosleep(&ts, NULL);
+	}
+}
+
 uint32_t find_crtc( int drm_fd, drmModeResPtr resources, drmModeConnectorPtr connector, uint32_t& taken_crtcs )
 {
 
@@ -174,16 +207,15 @@ int main( int argc, const char* argv[] )
             output.connected = false;
             goto incompatible;
         }
-/*            
-        std::cout << " connector: " << connector->connector_id << " modes: " << connector->count_modes << "\n";
+/*  
+        std::cout << " connector: " << drm_connector->connector_id << " modes: " << drm_connector->count_modes << "\n";
         std::cout << "mode info:";
-        for(int j = 0; j < connector->count_modes; j++)
+        for(int j = 0; j < drm_connector->count_modes; j++)
         {
-            drmModeModeInfo modeInfo = connector->modes[j];
+            drmModeModeInfo modeInfo = drm_connector->modes[j];
             std::cout <<"\n "<< modeInfo.hdisplay << "x" << modeInfo.vdisplay << "(" << modeInfo.vrefresh << ")\n";
         }
 */
-
         output.crtc_id = find_crtc(drm_fd, resources, drm_connector, taken_crtc );
 
         if(!output.crtc_id) {
@@ -209,6 +241,7 @@ int main( int argc, const char* argv[] )
         std::cout << "Created FB with id " << output.fb.id << "\n";
 
         output.previousCrtc = drmModeGetCrtc( drm_fd, output.crtc_id );
+        break;
 incompatible:
             drmModeFreeConnector(drm_connector);
     }
@@ -233,6 +266,9 @@ incompatible:
             }
         }
     };
+
+    std::cout << "Presenter Set\n";
+    drawFrame(output);
 
     l_cleanup(output);
     close(drm_fd);
