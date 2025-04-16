@@ -176,7 +176,16 @@ bool create_fb( const int& drm_fd, presenter& output ) {
 
 int main( int argc, const char* argv[] )
 {
-    int drm_fd = open( "/dev/dri/card0", O_RDWR | O_NONBLOCK );    
+    if( argc < 2 )
+    {
+        std::cout << "<program_name> <drm_device_path>";
+    }
+
+    const char* drm_device = argv[1];
+    int drm_fd = open( drm_device, O_RDWR | O_NONBLOCK );    
+
+    if( drm_fd == -1 )
+        std::cout << "Failed to Open " << drm_device << " device\n";
 
     drmModeResPtr resources = drmModeGetResources(drm_fd);
 
