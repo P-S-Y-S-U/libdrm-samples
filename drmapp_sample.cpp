@@ -178,7 +178,8 @@ int main( int argc, const char* argv[] )
 {
     if( argc < 2 )
     {
-        std::cout << "<program_name> <drm_device_path>";
+        std::cout << "<program_name> <drm_device_path>\n";
+        return EXIT_FAILURE;
     }
 
     const char* drm_device = argv[1];
