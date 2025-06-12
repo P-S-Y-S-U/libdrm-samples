@@ -31,3 +31,9 @@ target_include_directories(DrmApp   PUBLIC  $<BUILD_INTERFACE:${PROJECT_INCLUDE_
                                             $<BUILD_INTERFACE:${Libdrm_INCLUDE_DIRS}>
 )
 target_link_libraries(DrmApp PUBLIC ${Libdrm_LIBRARIES})
+
+add_executable(DrmVsync drm_vsync.cpp)
+target_include_directories(DrmVsync   PUBLIC  $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
+                                            $<BUILD_INTERFACE:${Libdrm_INCLUDE_DIRS}>
+)
+target_link_libraries(DrmVsync PUBLIC ${Libdrm_LIBRARIES})
